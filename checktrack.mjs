@@ -1,47 +1,50 @@
-// import {readFileSync, existsSync} from "fs";
-// import { homedir } from "os";
-// import {join} from "path";
-
-// const track = JSON.parse(readFileSync("./track.json"));
-// const root = track.root.replace("~", homedir() + '/Documents/GitHub/');
-
-// for (const {name, required} of track.projects) {
-//     const projectExists = existsSync(join(root, name));
-//     console.log(projectExists ? "✅" : "❌", join(root, name), required.length);
-// }
-
-// importer des outils pour lire les fichiers et vérifier s'ils existent
 import {readFileSync, existsSync} from "fs";
-
-// outil pour construire des chemins de dossier
+import { homedir } from "os";
 import {join} from "path";
 
-// outil pour récupérer le dossier personnel de l'utilisateur
-import {homedir} from "os";
-
-// lire le fichier track.json et le transformer en objet JavaScript
 const track = JSON.parse(readFileSync("./track.json"));
-
-// remplacer ~ par le vrai dossier utilisateur
 const root = track.root.replace("~", homedir() + '/Documents/GitHub/');
-const checkdirAda = join(root, "ada");
+const dirAdaExists = existsSync(join(homedir(), "ada"));
 
-// parcourir tous les projets du fichier JSON
-for (const {name, required} of track.projects) {
 
-    // vérifier si le dossier du projet existe
-    const projectExists = existsSync(path);
 
-    // afficher :
-    // ✅ si le dossier existe
-    // ❌ sinon
-    // le chemin du projet
-    // le nombre de fichiers requis
-    console.log(projectExists ? "✅" : "❌", join(root, name), required.length);
-}
-
-if (checkdirAda) {
-    console.log("Le dossier Ada existe");
+if (dirAdaExists) {
+    console.log("✅ dossier ada");
 } else {
-    console.log("Le dossier Ada n'existe pas");
+    console.log("❌ Le dossier ada n'existe pas");
 }
+
+for (const {name, required} of track.projects) {
+    const projectPath = join(root, name);
+    const projectExists = existsSync(join(root, name));
+    const gitExists = existsSync(join(projectPath, ".git"));
+    const missingFiles = required.filter(file => !existsSync(join(projectPath, file)));
+
+    if (!projectExists) {
+        console.log(`❌ dossier du projet ${name}`);
+        console.log("- le dossier n'existe pas ou n'est pas nommé correctement\n");
+    } else {
+
+
+        if (gitExists && missingFiles.length === 0) {
+            console.log(`✅ dossier du projet ${name}\n`);
+        } else {
+
+            console.log(`❌ dossier du projet ${name}`);
+
+            if (!gitExists) {
+                console.log("- le repository git n'est pas initialisé");
+            }
+
+            if (missingFiles.length > 0) {
+                console.log(`- les fichiers suivants sont manquants : ${missingFiles.join(", ")}`);
+            }
+
+            console.log();
+        }
+    }
+}
+        // console.log(
+        //     projectExists ?  `✅ dossier du projet ${name}\n` : `❌ dossier du projet ${name}\n\n- le dossier n'existe pas ou n'est pas nommé correctement \n`,
+        //     gitExists ? "":"- le repository git n'est pas initialisé\n",
+        //   
